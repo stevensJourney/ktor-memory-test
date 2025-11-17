@@ -1,6 +1,8 @@
 package com.powersync.ktortest
 
-import platform.Foundation.NSDate
+import kotlinx.datetime.Clock
 
-actual fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000.0).toLong()
+actual fun currentTimeMillis(): Long {
+    return Clock.System.now().toEpochMilliseconds()
+}
 

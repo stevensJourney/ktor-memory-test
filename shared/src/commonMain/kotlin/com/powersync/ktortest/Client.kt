@@ -25,7 +25,6 @@ class StreamClient(
             println("Client: Starting to receive data...")
             
             var lineCount = 0
-            val startTime = currentTimeMillis()
             
             // Read the response as a stream of lines using ByteReadChannel (same as PowerSync)
             val body: ByteReadChannel = response.body()
@@ -37,8 +36,7 @@ class StreamClient(
                     
                     // Print every 1000th line to avoid flooding console
                     if (lineCount % 1000 == 0) {
-                        val elapsed = (currentTimeMillis() - startTime) / 1000
-                        println("Client: Received $lineCount lines (${elapsed}s elapsed)")
+                        println("Client: Received $lineCount lines")
                     }
 //                    delay(1000)
                 } else if (line == null) {
@@ -47,11 +45,7 @@ class StreamClient(
                 }
             }
             
-            val elapsed = (currentTimeMillis() - startTime) / 1000.0
-            println("Client: Finished. Received $lineCount lines in ${elapsed}s")
-            if (elapsed > 0) {
-                println("Client: Average rate: ${(lineCount / elapsed).toInt()} lines/second")
-            }
+            println("Client: Finished. Received $lineCount lines")
             
         } catch (e: Exception) {
             println("Client: Error - ${e.message}")
