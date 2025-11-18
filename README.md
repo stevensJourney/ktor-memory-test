@@ -67,6 +67,44 @@ The client will connect to the server and start receiving/printing JSON lines.
    ```
 3. Click "Connect to Server" button in the app
 
+### Run iOS Client
+
+**Note**: The iOS client is the one experiencing memory issues and should be monitored closely.
+
+1. **Start the server** (in a separate terminal):
+
+   ```bash
+   ./gradlew :server:runServer
+   ```
+
+2. **Open the Xcode project**:
+
+   ```bash
+   open iosApp/iosApp.xcodeproj
+   ```
+
+   Or manually open `iosApp/iosApp.xcodeproj` in Xcode.
+
+3. **Build and run the iOS app**:
+
+   - Select a simulator or connected device in Xcode
+   - Click the Run button (▶️) or press `Cmd+R`
+   - Xcode will automatically build the Kotlin Multiplatform framework and then build/launch the app
+
+4. **Monitor memory usage**:
+
+   - **Using Xcode's Debug Navigator**:
+     - While debugging, open the Debug Navigator (left sidebar)
+     - Monitor the Memory graph in real-time as the stream processes
+
+5. **Interact with the app**:
+
+   - Click "Connect to Server" button in the app
+   - The app will connect to `http://localhost:8080` and start receiving the JSON stream
+   - Watch for memory growth patterns and potential leaks
+
+**Note**: For physical iOS devices, update the server URL in `App.kt` to use your computer's IP address instead of `localhost`.
+
 ## Configuration
 
 You can modify the following in `server/src/main/kotlin/com/powersync/ktortest/Application.kt`:
@@ -101,6 +139,14 @@ You can modify the following in `server/src/main/kotlin/com/powersync/ktortest/A
 - Uses Ktor CIO engine (the default)
 - Compose Multiplatform UI
 - Run via: `./gradlew :composeApp:run`
+
+### iOS
+
+- Uses Ktor Darwin engine (NSURLSession)
+- Compose Multiplatform UI
+- Run via Xcode: Open `iosApp/iosApp.xcodeproj` and build/run (framework builds automatically)
+- **Note**: This platform is experiencing memory issues when processing large JSON streams
+- Server URL: `http://localhost:8080` (simulator) or your computer's IP (physical device)
 
 ## Notes
 
