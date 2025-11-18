@@ -9,9 +9,7 @@ expect fun createHttpClient(block: HttpClientConfig<*>.() -> Unit = {}): HttpCli
 
 fun createDefaultHttpClient(): HttpClient {
     return createHttpClient {
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
-        }
+        install(ContentNegotiation)
     }
 }
 

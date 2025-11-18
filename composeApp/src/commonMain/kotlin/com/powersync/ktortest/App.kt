@@ -30,6 +30,43 @@ fun App() {
         var errorMessage by remember { mutableStateOf<String?>(null) }
         val coroutineScope = rememberCoroutineScope()
         
+        // Helper function to get server URL
+        val getServerUrl: () -> String = remember {
+            {
+                when {
+                    PlatformDetector.isAndroid() -> "http://10.0.2.2:${SERVER_PORT}"
+                    PlatformDetector.isIOS() -> "http://localhost:${SERVER_PORT}"
+                    else -> "http://localhost:${SERVER_PORT}"
+                }
+            }
+        }
+        
+        // Helper function to connect with a client
+        val connectWithClient: (StreamClientInterface) -> Unit = remember(coroutineScope) {
+            { client ->
+                if (!isConnecting) {
+                    isConnecting = true
+                    connectionStatus = "Connecting..."
+                    errorMessage = null
+                    
+                    coroutineScope.launch {
+                        try {
+                            connectionStatus = "Connected. Receiving data..."
+                            client.connectAndStream()
+                            connectionStatus = "Connection completed successfully!"
+                        } catch (e: Exception) {
+                            errorMessage = "Error: ${e.message}"
+                            connectionStatus = "Connection failed"
+                        } finally {
+                            isConnecting = false
+                        }
+                    }
+                }
+            }
+        }
+        
+        val serverUrl = remember { getServerUrl() }
+        
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -42,45 +79,18 @@ fun App() {
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Ktor Stream Client",
+                text = "Stream Client",
                 style = MaterialTheme.typography.headlineMedium
             )
             
+            // Ktor Client Button
             Button(
                 onClick = {
-                    if (!isConnecting) {
-                        isConnecting = true
-                        connectionStatus = "Connecting..."
-                        errorMessage = null
-                        
-                        coroutineScope.launch {
-                            try {
-                                // Determine server URL based on platform
-                                val serverUrl = when {
-                                    // Android emulator
-                                    PlatformDetector.isAndroid() -> "http://10.0.2.2:${SERVER_PORT}"
-                                    // iOS simulator or physical device
-                                    PlatformDetector.isIOS() -> "http://localhost:${SERVER_PORT}"
-                                    // JVM/Desktop
-                                    else -> "http://localhost:${SERVER_PORT}"
-                                }
-                                
-                                connectionStatus = "Connected. Receiving data..."
-                                
-                                val client = StreamClient(serverUrl = serverUrl)
-                                client.connectAndStream()
-                                
-                                connectionStatus = "Connection completed successfully!"
-                            } catch (e: Exception) {
-                                errorMessage = "Error: ${e.message}"
-                                connectionStatus = "Connection failed"
-                            } finally {
-                                isConnecting = false
-                            }
-                        }
-                    }
+                    val client = StreamClient(serverUrl = serverUrl)
+                    connectWithClient(client)
                 },
-                enabled = !isConnecting
+                enabled = !isConnecting,
+                modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 if (isConnecting) {
                     CircularProgressIndicator(
@@ -88,7 +98,7 @@ fun App() {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text(if (isConnecting) "Connecting..." else "Connect to Server")
+                Text(if (isConnecting) "Connecting..." else "Connect with Ktor")
             }
             
             AnimatedVisibility(connectionStatus != null) {
