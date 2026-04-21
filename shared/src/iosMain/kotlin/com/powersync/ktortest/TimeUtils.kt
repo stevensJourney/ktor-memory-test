@@ -1,6 +1,6 @@
 package com.powersync.ktortest
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 actual fun currentTimeMillis(): Long {
     return Clock.System.now().toEpochMilliseconds()

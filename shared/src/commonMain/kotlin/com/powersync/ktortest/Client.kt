@@ -6,10 +6,17 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.discard
+import io.ktor.utils.io.read
+import io.ktor.utils.io.readByteArray
+import io.ktor.utils.io.readLineStrict
 import io.ktor.utils.io.readUTF8Line
+import io.ktor.utils.io.skipIfFound
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 class StreamClient(
-    private val serverUrl: String = "http://10.0.2.2:8080", // Use 10.0.2.2 for Android emulator to access localhost
+    private val serverUrl: String = "http://localhost:8080", // Use 10.0.2.2 for Android emulator to access localhost
     private val httpClient: HttpClient = createDefaultHttpClient()
 ) : StreamClientInterface {
     override suspend fun connectAndStream() {
@@ -44,12 +51,11 @@ class StreamClient(
                 println("Client: Starting to read stream...")
                 
                 while (!body.isClosedForRead) {
-                    val line = body.readUTF8Line()
-                    if (line != null && line.isNotBlank()) {
+                    val line = body.readLineStrict()
+                    if (!line.isNullOrBlank()) {
                         lineCount++
 
-                        println("line count is $lineCount")
-                        
+                        println("line count is $lineCount, length was ${line.length}")
                         // Print every 1000th line to avoid flooding console
                         if (lineCount % 1000 == 0) {
                             println("Client: Received $lineCount lines")
